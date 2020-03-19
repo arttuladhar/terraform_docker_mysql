@@ -8,7 +8,7 @@ pipeline {
 
     }
 
-    git scm
+    checkout scm
         
     if(action == 'Deploy') {
       stages {
