@@ -1,6 +1,4 @@
 pipeline {
-    agent none
-
     parameters {
       choice(choices: ['Deploy', 'Destroy'], description: 'User Action', name: 'action')
       string(defaultValue: "p@ssW0rd", description: 'MySQL Root Password', name: 'mysql_root_password')
@@ -8,10 +6,12 @@ pipeline {
 
     }
 
+    node {
+
     checkout scm
         
     if(action == 'Deploy') {
-      stages {
+
         stage('init') {
         sh label: 'terraform init', script: "terraform init"
         }
@@ -31,10 +31,9 @@ pipeline {
             sh label: 'terraform apply', script: "terraform apply -lock=false -input=false tfplan"
         }
       }
-  }
+
 
     if(action == 'Destroy') {    
-      stages {
       stage('plan_destroy') {
       def ROOT_PASSWORD = sh (returnStdout: true, script: """echo ${mysql_root_password} | base64""").trim()
       def USER_PASSWORD = sh (returnStdout: true, script: """echo ${mysql_user_password} | base64""").trim()
@@ -54,5 +53,5 @@ pipeline {
       sh label: 'cleanup', script: "rm -rf terraform.tfstat"
       }
       }
-    }
+}
 }
